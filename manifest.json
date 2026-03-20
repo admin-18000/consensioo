@@ -1,0 +1,22 @@
+{
+  "name": "Consensioo",
+  "short_name": "Consensioo",
+  "description": "Orientation & Reconversion \u2014 Syst\u00e8me de matching scientifique",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
