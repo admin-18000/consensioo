@@ -743,12 +743,12 @@ function fmtE(n){return Math.round(n).toLocaleString('fr-FR')+' €';}
 
 // ══ CONSTRUCTION RÉSULTATS ════════════════════════════════════════
 function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget){
+  const isO=mode==='orientation';
   const prenom=gv('pp')||'',nom=gv('pnom')||'',age=gv('pa'),situation=gv('ps')||'';
   const identite=[prenom,nom].filter(Boolean).join(' ')||(prenom||nom||'Profil');
   const mActuel=!isO&&document.getElementById('pme')?document.getElementById('pme').value.trim():'';
   const sActuel=!isO&&document.getElementById('pse')?document.getElementById('pse').value.trim():'';
   const top3=Object.entries(riasec).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]).join(' + ');
-  const isO=mode==='orientation';
   const rlabels={R:'Réaliste',I:'Investigateur',A:'Artistique',S:'Social',E:'Entreprenant',C:'Conventionnel'};
 
   let h='';
