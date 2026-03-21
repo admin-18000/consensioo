@@ -146,6 +146,39 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
 .btn.sec{color:var(--blue);border-color:rgba(0,85,255,.3)}.btn.sec:hover{background:var(--bluel)}
 .vban{border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
 .vban.ok{background:var(--greenl);border:1.5px solid rgba(0,122,69,.25)}
+.fondateur-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:5px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.2);box-shadow:0 2px 12px rgba(37,99,235,.35)}
+.fondateur-badge .dot{width:6px;height:6px;background:#fbbf24;border-radius:50%;display:inline-block;animation:fpulse 2s infinite}
+@keyframes fpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.b2c-notif{background:linear-gradient(135deg,rgba(30,58,138,.12),rgba(251,191,36,.08));border:1px solid rgba(37,99,235,.2);border-radius:10px;padding:12px 16px;margin:14px 0;display:flex;align-items:flex-start;gap:10px;font-size:12px}
+.b2c-notif-ico{font-size:18px;flex-shrink:0}
+.b2c-notif strong{color:#1e40af;font-size:12px}
+.fondateur-strip{background:linear-gradient(90deg,#1e3a8a,#1d4ed8,#1e3a8a);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-align:center;padding:6px;position:sticky;top:0;z-index:200}
+.fondateur-strip span{color:#fbbf24}
+/* ══ PREMIUM ══ */
+.prix-page{max-width:640px;margin:0 auto;padding:8px 0 24px}
+.prix-hero{text-align:center;padding:20px 0 10px}
+.prix-hero h2{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+.prix-hero p{font-size:12px;color:var(--muted);line-height:1.6}
+.prix-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+.prix-card{border:1.5px solid var(--border);border-radius:14px;padding:20px 18px;position:relative;background:var(--bg2)}
+.prix-card.featured{border-color:#2563eb;background:linear-gradient(135deg,rgba(37,99,235,.06),var(--bg2))}
+.prix-badge-card{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#2563eb;color:#fff;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 12px;border-radius:20px;white-space:nowrap}
+.prix-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.prix-amount{font-size:38px;font-weight:900;color:var(--text);line-height:1}
+.prix-amount sup{font-size:16px;font-weight:700;vertical-align:top;margin-top:8px;display:inline-block}
+.prix-amount sub{font-size:12px;color:var(--muted);font-weight:400}
+.prix-desc{font-size:11px;color:var(--muted);line-height:1.6;margin:10px 0 16px}
+.prix-perks{list-style:none;padding:0;margin:0 0 16px;font-size:11px;color:var(--muted)}
+.prix-perks li{padding:3px 0;display:flex;gap:6px;align-items:baseline}
+.prix-perks li::before{content:'✓';color:#2563eb;font-weight:700;flex-shrink:0}
+.btn-paypal-soon{width:100%;padding:11px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg3);color:var(--muted);font-size:12px;font-weight:700;cursor:not-allowed;letter-spacing:.5px}
+.btn-paypal-active{width:100%;padding:11px;border-radius:8px;border:none;background:#0070ba;color:#fff;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:background .2s}
+.btn-paypal-active:hover{background:#005ea6}
+.freemium-banner{background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(37,99,235,.06));border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:12px 16px;text-align:center;margin:16px 0;font-size:12px;color:var(--muted)}
+.freemium-banner strong{color:#92400e}
+.lock-overlay{position:relative}
+.lock-overlay::after{content:'🔒 Disponible en avril — Gratuit ce mois-ci';position:absolute;inset:0;background:rgba(15,23,42,.85);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fbbf24;border-radius:8px;letter-spacing:.5px;display:flex}
+.lock-row{filter:blur(3px);pointer-events:none;user-select:none;opacity:.5}
 .vbi{font-size:28px}.vbt{font-size:14px;font-weight:600}.vbs{font-size:11px;color:var(--muted);margin-top:2px}
 .rg{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:14px}
 .rc2{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center}
@@ -178,6 +211,7 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
 </style>
 </head>
 <body>
+<div class="fondateur-strip">✦ Accès <span>Fondateur</span> · Gratuit · Édition limitée — Bientôt disponible en version Premium ✦</div>
 <header>
   <div>
     <div class="brand"><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
@@ -186,6 +220,7 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
       </div>
       🧭 Outil <em>Holistique</em> — Orientation & Reconversion</div>
     <div class="brand-sub">RIASEC · Valeurs · Contraintes · Matching métiers & formations · Anti-biais IA</div>
+    <div style="margin-top:8px"><span class="fondateur-badge"><span class="dot"></span>Accès Fondateur · Gratuit</span></div>
   </div>
   <div style="font-size:11px;color:#8892b0" id="mlabel">Mode : —</div>
 </header>
@@ -197,6 +232,7 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
   <div class="step" id="st4" onclick="goStep(4)"><span class="snum">5</span>Compétences</div>
   <div class="step" id="st5" onclick="goStep(5)"><span class="snum">6</span>Contraintes</div>
   <div class="step" id="st6" onclick="goStep(6)"><span class="snum">7</span>Résultats</div>
+  <div class="step" id="st7" onclick="goStep(7)" style="margin-left:auto;color:#f59e0b;border-left:1px solid var(--border);padding-left:14px"><span class="snum" style="background:#f59e0b">★</span>Tarifs</div>
 </nav>
 
 <div class="page active" id="page-0">
@@ -240,7 +276,12 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
           <label class="neuro-cb" style="grid-column:1/-1"><input type="checkbox" id="n-aucun" value="aucun" onchange="if(this.checked){document.querySelectorAll('#neuro-grid input[type=checkbox]:not(#n-aucun)').forEach(cb=>cb.checked=false)}"> Je préfère ne pas préciser</label>
         </div>
       </div>
-      <div class="navb"><button class="btn pri" onclick="goStep(1)" id="btn-next0" disabled>Continuer →</button></div>
+      <div class="b2c-notif">
+  <div class="b2c-notif-ico">🔓</div>
+  <div><strong>Accès Fondateur — 100% gratuit</strong><br>
+  Vous faites partie du cercle fermé des premiers utilisateurs de CONSENSIOO. Cet outil sera prochainement disponible en abonnement. Profitez-en maintenant, sans limite.</div>
+</div>
+<div class="navb"><button class="btn pri" onclick="goStep(1)" id="btn-next0" disabled>Continuer →</button></div>
 </div>
 
 <div class="page" id="page-1">
@@ -308,10 +349,86 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
     <button class="btn" onclick="window.print()">🖨 Imprimer</button>
     <button class="btn pri" onclick="resetAll()">↺ Nouveau profil</button>
   </div>
+  <div class="b2c-notif" style="margin:18px 0 0;border-color:rgba(251,191,36,.3);background:linear-gradient(135deg,rgba(251,191,36,.07),rgba(30,58,138,.06))">
+    <div class="b2c-notif-ico">⭐</div>
+    <div><strong style="color:#92400e">Vous venez d'utiliser CONSENSIOO en accès Fondateur</strong><br>
+    Cet outil sera bientôt proposé en abonnement Premium. En tant que testeur Fondateur, vous bénéficiez aujourd'hui d'un accès complet, sans frais.</strong><br><span onclick="goStep(7)" style="font-size:11px;color:#2563eb;cursor:pointer;text-decoration:underline">→ Voir la grille tarifaire (ouverture avril)</span></div>
+  </div>
+  
+  </div>
+</div>
+
+<div class="page" id="page-7">
+  <div class="prix-page">
+    <div class="prix-hero">
+      <div style="font-size:28px;margin-bottom:6px">⭐</div>
+      <h2>CONSENSIOO Premium</h2>
+      <p>Un outil. Une décision. Une fois.<br>Payez une seule fois, accédez à l'analyse complète pour toujours.</p>
+      <div class="freemium-banner">
+        <strong>🎁 Mars 2026 — Accès Fondateur gratuit</strong><br>
+        Vous bénéficiez ce mois-ci d'un accès 100% gratuit. L'offre payante ouvre en avril.
+      </div>
+    </div>
+
+    <div class="prix-grid">
+
+      <!-- Option 1 : Freemium -->
+      <div class="prix-card">
+        <div class="prix-label">Essentiel</div>
+        <div class="prix-amount"><sup>€</sup>0 <sub>/ toujours</sub></div>
+        <div class="prix-desc">Les bases pour explorer votre profil et vos pistes.</div>
+        <ul class="prix-perks">
+          <li>Profil RIASEC complet</li>
+          <li>Top 3 métiers compatibles</li>
+          <li>Top 3 formations</li>
+          <li>Score valeurs & compétences</li>
+        </ul>
+        <button class="btn-paypal-soon" disabled>Accès gratuit permanent</button>
+      </div>
+
+      <!-- Option 2 : Premium one-shot -->
+      <div class="prix-card featured">
+        <div class="prix-badge-card">⭐ Recommandé</div>
+        <div class="prix-label">Premium — Accès complet</div>
+        <div class="prix-amount"><sup>€</sup>19 <sub>/ paiement unique</sub></div>
+        <div class="prix-desc">L'analyse complète, une fois pour toutes. Pas d'abonnement.</div>
+        <ul class="prix-perks">
+          <li>Top 10 métiers + scores détaillés</li>
+          <li>Top 10 formations + VAE</li>
+          <li>Anti-biais IA complet</li>
+          <li>Scénarios de reconversion</li>
+          <li>Profil entrepreneurial</li>
+          <li>Synthèse imprimable</li>
+          <li>Accès à vie, sans limite</li>
+        </ul>
+        <button class="btn-paypal-soon" disabled>🔒 Ouverture avril 2026</button>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;line-height:1.8">
+      Paiement sécurisé via PayPal · Pas d'abonnement · Pas de renouvellement<br>
+      <strong style="color:var(--text)">Une décision d'orientation ou de reconversion, ça ne se prend qu'une fois.</strong>
+    </div>
+
+    <div class="b2c-notif" style="margin-top:20px">
+      <div class="b2c-notif-ico">💬</div>
+      <div><strong>Vous êtes Fondateur — vous ne paierez pas en mars.</strong><br>
+      Cette page vous donne un aperçu de ce que CONSENSIOO deviendra. Revenez en avril si vous souhaitez offrir un accès Premium à un proche.</div>
+    </div>
+  </div>
+  <div class="navb"><button class="btn sec" onclick="goStep(0)">← Retour à l'accueil</button></div>
 </div>
 
 <script>
 // ══ DONNÉES DE RÉFÉRENCE ══════════════════════════════════════════
+// ══ CONFIGURATION PREMIUM ══════════════════════════════════════
+const GRATUIT_JUSQUAU = new Date('2026-03-31T23:59:59');
+const IS_GRATUIT = new Date() <= GRATUIT_JUSQUAU;
+const PRIX_PREMIUM = 19; // € — à ajuster avant ouverture avril
+// IS_GRATUIT = true  → accès complet gratuit (mars)
+// IS_GRATUIT = false → freemium + paywall actif (avril+)
+
 const DB={
 orientation:{
 metiers:[
@@ -502,11 +619,22 @@ function buildContraintes(){
 
 // ══ NAVIGATION ═══════════════════════════════════════════════════
 function goStep(n){
-  if(n>0&&!mode)return;
+  if(n>0&&n!==7&&!mode)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.step').forEach((s,i)=>{s.classList.remove('active','done');if(i<n)s.classList.add('done');else if(i===n)s.classList.add('active');});
   document.getElementById('page-'+n).classList.add('active');
+  if(n===7) updatePrixPage();
   window.scrollTo(0,0);
+}
+function updatePrixPage(){
+  if(IS_GRATUIT) return;
+  const btns=document.querySelectorAll('.btn-paypal-soon');
+  if(btns[1]){
+    btns[1].className='btn-paypal-active';
+    btns[1].disabled=false;
+    btns[1].textContent='💳 Payer '+PRIX_PREMIUM+'€ via PayPal';
+    btns[1].onclick=()=>window.open('https://paypal.me/TNJECKIL/'+PRIX_PREMIUM,'_blank');
+  }
 }
 
 function gv(id){const el=document.getElementById(id);return el?el.value:'';}
@@ -635,7 +763,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
   else if(secteurActuelDisplay) h+=' · Secteur actuel : <strong>'+secteurActuelDisplay+'</strong>';
   h+=' · Code RIASEC dominant : <strong>'+top3+'</strong>';
   h+='</div>';
-  h+='<div class="vbs">'+(isO?'Outil Orientation':'Outil Reconversion')+' · '+metiers.length+' métiers · '+formations.length+' formations analysés</div>';
+  h+='<div class="vbs">'+(isO?'Outil Orientation':'Outil Reconversion')+' · '+metiers.length+' métiers · '+formations.length+' formations analysés · <span style="color:#f59e0b;font-weight:700">⭐ Accès Fondateur</span></div>';
   h+='</div></div>';
 
   // RIASEC scores
