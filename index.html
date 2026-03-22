@@ -762,7 +762,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
 
   // TOP formations (orientation) ou TOP métiers (reconversion)
   if(isO){
-    h+='<div class="card"><div class="ct">🎓 Top 10 Formations recommandées</div>';
+    h+='<div class="card"><div class="ct">🎓 Top 10 Formations recommandées</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Classées selon votre profil RIASEC, vos contraintes et vos objectifs. Chaque formation mène vers un ou plusieurs métiers compatibles.</div>';
     h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Niveau</th><th>Sélectivité</th><th>Score</th><th>Insertion 18m</th><th>Résistance IA</th></tr></thead><tbody>';
     formations.slice(0,10).forEach((f,i)=>{
       const pct=Math.round(f.final*100);
@@ -777,7 +777,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
   }
 
   // TOP métiers
-  h+='<div class="card"><div class="ct">💼 Top 10 '+(isO?'Métiers recommandés':'Métiers compatibles')+'</div>';
+  h+='<div class="card"><div class="ct">💼 Top 10 '+(isO?'Métiers recommandés':'Métiers compatibles')+'</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">'+(isO?'Métiers correspondant à votre profil RIASEC et vos valeurs. À croiser avec vos formations pour construire votre parcours.':'Métiers compatibles avec votre profil et résistants à l\'IA. Les scénarios ci-dessous vous montrent quelle formation y mène.')+'</div>';
   h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Métier</th><th>Secteur</th><th>Score</th><th>Salaire médian</th><th>% Tâches auto.</th><th>Résistance IA</th></tr></thead><tbody>';
   metiers.slice(0,10).forEach((m,i)=>{
     const pct=Math.round(m.final*100);
@@ -792,7 +792,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
 
   // TOP formations reconversion
   if(!isO){
-    h+='<div class="card"><div class="ct">📚 Top 10 Formations & VAE recommandées</div>';
+    h+='<div class="card"><div class="ct">📚 Top 10 Formations & VAE recommandées</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Classées selon vos contraintes (budget, durée, CPF) et votre résistance IA. Les <strong>3 scénarios ci-dessous</strong> vous montrent quelle formation mène à quel métier cible.</div>';
     h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Durée</th><th>Coût</th><th>CPF</th><th>Score</th><th>Résistance IA</th></tr></thead><tbody>';
     formations.slice(0,10).forEach((f,i)=>{
       const pct=Math.round(f.final*100);
