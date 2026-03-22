@@ -821,21 +821,99 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
     h+='</tbody></table></div></div>';
   }
 
-  // Scénarios
-  const m1=metiers[0],m2=metiers[1]||metiers[0],m3=metiers[2]||metiers[0];
-  const f1=formations[0],f2=formations[1]||formations[0],f3=formations[2]||formations[0];
-  h+='<div class="card"><div class="ct">🗺️ 3 Scénarios de parcours</div>';
-  h+='<table class="rt"><thead><tr><th>Scénario</th><th>Étape 1 (Formation)</th><th>Métier cible</th><th>Durée</th><th>Coût</th><th>Risque IA</th></tr></thead><tbody>';
-  if(isO){
-    h+='<tr><td><strong>🥇 Optimal</strong></td><td>'+f1.nom+'</td><td>'+m1.metier+(m1.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m1.salaire/1000)+'k€)</span>':'')+'</td><td>'+f1.duree+' ans</td><td>'+fmtE(f1.cout)+'/an</td><td><span class="ib '+iaC(m1.risque_ia||'Faible')+'">'+iaL(m1.risque_ia||'Faible')+'</span></td></tr>';
-    h+='<tr><td><strong>🥈 Alternatif</strong></td><td>'+f2.nom+'</td><td>'+m2.metier+(m2.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m2.salaire/1000)+'k€)</span>':'')+'</td><td>'+f2.duree+' ans</td><td>'+fmtE(f2.cout)+'/an</td><td><span class="ib '+iaC(m2.risque_ia||'Faible')+'">'+iaL(m2.risque_ia||'Faible')+'</span></td></tr>';
-    h+='<tr><td><strong>🥉 Sécurisé</strong></td><td>'+f3.nom+'</td><td>'+m3.metier+(m3.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m3.salaire/1000)+'k€)</span>':'')+'</td><td>'+f3.duree+' ans</td><td>'+fmtE(f3.cout)+'/an</td><td><span class="ib if2">🟢 Faible</span></td></tr>';
-  }else{
-    h+='<tr><td><strong>🥇 Optimal</strong><br><small style="color:var(--muted)">Métier → Formation → Métier</small></td><td>'+f1.nom+'</td><td>'+m1.metier+(m1.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m1.salaire/1000)+'k€)</span>':'')+'</td><td>'+f1.duree+' mois</td><td>'+fmtE(f1.cout)+'</td><td><span class="ib '+iaC(m1.risque_ia||'Faible')+'">'+iaL(m1.risque_ia||'Faible')+'</span></td></tr>';
-    const typeEntrepr=entrepreneuriat.length?entrepreneuriat[0].type:'Freelance';
-    h+='<tr><td><strong>🥈 Entrepreneurial</strong><br><small style="color:var(--muted)">Reconversion → '+typeEntrepr+'</small></td><td>'+f2.nom+'</td><td>'+m2.metier+(m2.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m2.salaire/1000)+'k€)</span>':'')+'</td><td>'+f2.duree+' mois</td><td>'+fmtE(f2.cout)+'</td><td><span class="ib '+iaC(m2.risque_ia||'Faible')+'">'+iaL(m2.risque_ia||'Faible')+'</span></td></tr>';
-    h+='<tr><td><strong>🥉 Sécurisé</strong><br><small style="color:var(--muted)">Évolution + montée en compétences</small></td><td>'+f3.nom+'</td><td>'+m3.metier+(m3.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m3.salaire/1000)+'k€)</span>':'')+'</td><td>'+f3.duree+' mois</td><td>'+fmtE(f3.cout)+'</td><td><span class="ib if2">🟢 Faible</span></td></tr>';
+  // ══ SCÉNARIOS — paires formation↔métier cohérentes ══════════
+  // Table de correspondance formation → métier cible compatible
+  // Fidèle au mapping Excel B4/B1 corrigé
+  const FM_MAP={
+    // Reconversion
+    'Titre Pro Développeur·se web / mobile':{'m':'Développeur·se web / mobile','risque':'Modéré'},
+    'Titre Pro Formateur·trice':{'m':'Coach / Formateur·trice','risque':'Faible'},
+    'Formation Permaculture / Maraîchage Bio':{'m':'Maraîcher·ère / Producteur·trice','risque':'Faible'},
+    'CAP Électricien·ne':{'m':'Technicien·ne énergies renouvelables','risque':'Faible'},
+    'BTS Énergies Renouvelables':{'m':'Technicien·ne énergies renouvelables','risque':'Faible'},
+    'CQP Infirmier·ière (VAE)':{'m':'Infirmier·ère','risque':'Faible'},
+    'Titre Pro Assistant·e Ressources Humaines':{'m':'Consultant·e RH','risque':'Faible'},
+    'MBA Management et Stratégie':{'m':'Chef·fe de projet IT','risque':'Modéré'},
+    'Certification Coach Professionnel':{'m':'Coach / Formateur·trice','risque':'Faible'},
+    'Master Design de Services / UX':{'m':'Designer graphique / UX','risque':'Modéré'},
+    // Orientation
+    'Licence Médecine (PASS)':{'m':'Médecin généraliste','risque':'Faible'},
+    'BUT Informatique':{'m':'Développeur / Développeuse web','risque':'Faible'},
+    'BTS Services Informatiques':{'m':'Développeur / Développeuse web','risque':'Faible'},
+    'CPGE Scientifique':{'m':'Ingénieur·e (grandes écoles)','risque':'Faible'},
+    'CPGE Économique (ECG)':{'m':'Manager / Consultant·e stratégie','risque':'Faible'},
+    'Licence Psychologie':{'m':'Psychologue / Conseiller·ère','risque':'Faible'},
+    'Licence Droit':{'m':'Juriste / Avocat·e','risque':'Faible'},
+    'BTS Comptabilité Gestion':{'m':'Comptable / Contrôleur de gestion','risque':'Modéré'},
+    'Bachelor Design Graphique (DNMADE)':{'m':'Graphiste / Designer','risque':'Modéré'},
+    'BTS Communication':{'m':'Chargé·e communication / Marketing','risque':'Modéré'},
+    'Licence Biologie':{'m':'Ingénieur·e biomédical·e','risque':'Faible'},
+    'Licence Économie-Gestion':{'m':'Commercial·e / Manager','risque':'Modéré'},
+  };
+
+  // Construire 3 scénarios cohérents : chercher des paires formation+métier compatibles
+  function buildScenarios(formations, metiers, isOri){
+    const scenes=[];
+    const usedM=new Set(), usedF=new Set();
+    // Priorité : formations ayant un mapping direct → trouver le métier dans la liste
+    for(const f of formations){
+      if(usedF.has(f.nom)) continue;
+      const map=FM_MAP[f.nom];
+      if(map){
+        // Chercher ce métier dans la liste scorée
+        const mObj=metiers.find(m=>m.metier&&m.metier.toLowerCase().includes(map.m.toLowerCase().split('/')[0].trim().toLowerCase()));
+        const mTarget=mObj||{metier:map.m,salaire:null,risque_ia:map.risque==='Faible'?'Faible':map.risque};
+        if(!usedM.has(mTarget.metier)){
+          scenes.push({f,m:mTarget,risque:map.risque});
+          usedM.add(mTarget.metier);
+          usedF.add(f.nom);
+          if(scenes.length>=3) break;
+        }
+      }
+    }
+    // Fallback : si < 3, prendre formation + métier du même domaine RIASEC
+    if(scenes.length<3){
+      for(const f of formations){
+        if(usedF.has(f.nom)||scenes.length>=3) continue;
+        // Chercher métier avec RIASEC commun
+        const mMatch=metiers.find(m=>!usedM.has(m.metier)&&f.riasec&&m.riasec&&
+          f.riasec.split('').some(l=>m.riasec.includes(l)));
+        if(mMatch){
+          scenes.push({f,m:mMatch,risque:'Modéré'});
+          usedM.add(mMatch.metier); usedF.add(f.nom);
+        }
+      }
+    }
+    // Dernier fallback : prendre top formation avec top métier différents des déjà utilisés
+    for(const f of formations){
+      if(usedF.has(f.nom)||scenes.length>=3) continue;
+      const m=metiers.find(m=>!usedM.has(m.metier));
+      if(m){scenes.push({f,m,risque:'Modéré'});usedM.add(m.metier);usedF.add(f.nom);}
+    }
+    return scenes.slice(0,3);
   }
+
+  const scenes=buildScenarios(formations,metiers,isO);
+  const scLabels=isO
+    ?[['🥇 Optimal','Formation → Métier cible'],['🥈 Alternatif','Formation différente → Métier compatible'],['🥉 Sécurisé','Formation courte → Accès rapide']]
+    :[['🥇 Optimal','Métier → Formation → Métier cible'],['🥈 Alternatif','Formation différente → Nouveau métier'],['🥉 Sécurisé','Formation CPF courte → Métier résistant IA']];
+
+  h+='<div class="card"><div class="ct">🗺️ 3 Scénarios de parcours</div><div class="rt-wrap">';
+  h+='<table class="rt"><thead><tr><th>Scénario</th><th>Formation</th><th>Métier cible</th><th>Durée</th><th>Coût</th><th>Risque IA</th></tr></thead><tbody>';
+  scenes.forEach((sc,i)=>{
+    const [lbl,sub]=scLabels[i]||['Scénario',''];
+    const dur=isO?(sc.f.duree?(sc.f.duree+' ans'):'—'):(sc.f.duree?(sc.f.duree+' mois'):'—');
+    const cout=sc.f.cout?fmtE(sc.f.cout)+(isO?'/an':''):'—';
+    const rIA=sc.risque||sc.m.risque_ia||'Faible';
+    h+='<tr>';
+    h+='<td><strong>'+lbl+'</strong><br><small style="color:var(--muted)">'+sub+'</small></td>';
+    h+='<td style="font-weight:500">'+sc.f.nom+'</td>';
+    h+='<td>'+sc.m.metier+(sc.m.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(sc.m.salaire/1000)+'k€)</span>':'')+'</td>';
+    h+='<td style="font-family:var(--mono);font-size:11px">'+dur+'</td>';
+    h+='<td style="font-family:var(--mono);font-size:11px">'+cout+'</td>';
+    h+='<td><span class="ib '+iaC(rIA)+'">'+iaL(rIA)+'</span></td>';
+    h+='</tr>';
+  });
   h+='</tbody></table></div></div>';
 
   // Dispositifs publics (reconversion)
