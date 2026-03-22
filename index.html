@@ -10,92 +10,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎓 Consensioo — Orientation & Reconversion</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
-function getNeuro(){
-  const ids=['hpi','hpe','zebre','2e','hpc','tdah','dyslexie','dysortho','dyscalc','dysprax','dysphasie','tsa','hyper'];
-  const checked=[];
-  ids.forEach(id=>{
-    const el=document.getElementById('n-'+id);
-    if(el&&el.checked) checked.push(id);
-  });
-  return checked;
-}
-
-// Scoring neuro — bonus/malus par profil
-// +1 = très favorable, +0.5 = favorable, -0.5 = défavorable, -1 = très défavorable (Fort)
-const NEURO_METIER={
-  // POTENTIEL ATYPIQUE
-  hpi:{
-    bonus:["Recherche","Ingénierie","Numérique / IT","Enseignement","Stratégie","Environnement","Architecture","Droit","Sciences humaines"],
-    malus:[],fort:false,w:0.8
-  },
-  hpe:{
-    bonus:["Santé","Accompagnement","Social","RH","Art","Communication"],
-    malus:[],fort:false,w:0.6
-  },
-  zebre:{
-    bonus:["Recherche","Art","Accompagnement","Ingénierie","Environnement"],
-    malus:["Commerce","Logistique"],fort:false,w:0.7
-  },
-  "2e":{
-    bonus:["Recherche","Ingénierie","Numérique / IT","Art","Santé"],
-    malus:[],fort:false,w:0.7
-  },
-  hpc:{
-    bonus:["Art","Communication","Architecture","Numérique / IT","Design"],
-    malus:[],fort:false,w:0.6
-  },
-  // TDAH
-  tdah:{
-    bonus:["Commerce","Numérique / IT","Art","Communication","Santé","Environnement"],
-    malus:["Finance","Droit","Comptabilité","Logistique"],fort:false,w:0.7
-  },
-  // DYS
-  dyslexie:{
-    bonus:["Art","Numérique / IT","Architecture","Ingénierie","Commerce"],
-    malus:["Droit","Communication"],fort:false,w:0.5
-  },
-  dysortho:{
-    bonus:["Numérique / IT","Art","Ingénierie","Santé"],
-    malus:["Communication","Droit"],fort:false,w:0.4
-  },
-  dyscalc:{
-    bonus:["Art","Communication","Social","Santé","RH"],
-    malus:["Finance","Ingénierie","Comptabilité"],fort:false,w:0.5
-  },
-  dysprax:{
-    bonus:["Numérique / IT","Recherche","Art","Communication"],
-    malus:["Logistique","BTP","Agriculture"],fort:false,w:0.4
-  },
-  dysphasie:{
-    bonus:["Numérique / IT","Art","Recherche","Ingénierie"],
-    malus:["Commerce","Communication"],fort:false,w:0.4
-  },
-  // SPECTRE
-  tsa:{
-    bonus:["Numérique / IT","Recherche","Ingénierie","Logistique","Finance","Environnement"],
-    malus:["Commerce","Social","RH","Communication"],fort:true,w:1.0
-  },
-  hyper:{
-    bonus:["Santé","Social","Art","Environnement","Accompagnement","Éducation"],
-    malus:["Commerce","Finance","Logistique"],fort:false,w:0.7
-  }
-};
-
-function scoreNeuro(secteur, neuroList){
-  if(!neuroList||neuroList.length===0) return 0;
-  let total=0, count=0;
-  neuroList.forEach(n=>{
-    const profile=NEURO_METIER[n];
-    if(!profile) return;
-    const inBonus=profile.bonus.some(b=>secteur&&secteur.toLowerCase().includes(b.toLowerCase()));
-    const inMalus=profile.malus.some(b=>secteur&&secteur.toLowerCase().includes(b.toLowerCase()));
-    if(inBonus) total += profile.fort ? 1.0 : 0.5;
-    if(inMalus) total += profile.fort ? -1.0 : -0.5;
-    count++;
-  });
-  return count>0 ? Math.max(-1,Math.min(1,total/count)) : 0;
-}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" onerror="window.CHART_FAILED=true">
 </script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -204,6 +119,34 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
 .disp-mont{font-family:var(--mono);font-size:11px;color:var(--blue);text-align:right}
 @media(max-width:700px){.mode-grid,.fg,.rg{grid-template-columns:1fr}}
 @media print{header,nav,.stepper,.navb{display:none!important}.page{display:block!important;padding:0}.card{break-inside:avoid}}
+/* ═══ RESPONSIVE MOBILE ═══════════════════════════════════════ */
+@media(max-width:640px){
+  .main{padding:8px 6px}
+  .card{padding:12px 10px;margin-bottom:10px}
+  .fg{grid-template-columns:1fr!important}
+  .mode-grid{grid-template-columns:1fr!important;gap:10px}
+  .rg{grid-template-columns:repeat(3,1fr)!important}
+  .prix-grid{grid-template-columns:1fr!important}
+  .stepper{padding:0 4px;gap:0}
+  .step{padding:6px 5px;font-size:9px;gap:2px}
+  .snum{width:18px;height:18px;font-size:9px}
+  .vban{flex-direction:column;gap:6px;align-items:flex-start}
+  .vbt{font-size:12px}
+  .vbs{font-size:10px}
+  .fondateur-strip{font-size:8px;padding:4px 6px}
+  .b2c-notif{flex-direction:column;gap:6px}
+  .prix-page{padding:4px 0 16px}
+  .prix-amount{font-size:28px}
+  /* Stepper — masquer texte, garder numéros */
+  .step>span:not(.snum){display:none}
+}
+/* Tableaux scrollables sur mobile */
+.rt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border-radius:8px}
+@media(max-width:640px){
+  .rt{min-width:520px;font-size:10px}
+  .rt th,.rt td{padding:5px 4px}
+  .rt-wrap::after{content:'⟵ Glisser ⟶';display:block;text-align:center;font-size:9px;color:var(--muted);padding:3px 0;font-style:italic}
+}
 
 .neuro-cb{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);padding:6px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:all .15s}
 .neuro-cb:hover{border-color:var(--orange);background:rgba(255,140,0,.06)}
@@ -421,6 +364,11 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
 </div>
 
 <script>
+
+// Scoring neuro — bonus/malus par profil
+// +1 = très favorable, +0.5 = favorable, -0.5 = défavorable, -1 = très défavorable (Fort)
+
+
 // ══ DONNÉES DE RÉFÉRENCE ══════════════════════════════════════════
 // ══ CONFIGURATION PREMIUM ══════════════════════════════════════
 const GRATUIT_JUSQUAU = new Date('2026-03-31T23:59:59');
@@ -557,6 +505,11 @@ const ans={r:{},v:{},m:{},c:{}};
 // ══ MODE ═════════════════════════════════════════════════════════
 function setMode(m){
   mode=m;
+  // Réinitialiser le bouton recommandations à chaque changement de mode
+  setTimeout(()=>{
+    const bRec=document.querySelector('#page-5 .navb .btn.pri');
+    if(bRec){bRec.disabled=true;bRec.style.opacity='0.45';bRec.title='Répondez à au moins 18 affirmations RIASEC';}
+  },50);
   document.getElementById('mc-o').classList.toggle('selected',m==='orientation');
   document.getElementById('mc-r').classList.toggle('selected',m==='reconversion');
   document.getElementById('btn-next0').disabled=false;
@@ -590,7 +543,19 @@ function qs(i,cat,txt){
 }
 function sa(cat,i,v){
   ans[cat][i]=v;
-  if(cat==='r'){const n=Object.keys(ans.r).length;document.getElementById('rp').textContent=n+' / 36 répondus';document.getElementById('rpf').style.width=(n/36*100)+'%';}
+  if(cat==='r'){
+    const n=Object.keys(ans.r).length;
+    document.getElementById('rp').textContent=n+' / 36 répondus';
+    document.getElementById('rpf').style.width=(n/36*100)+'%';
+    // Activer/désactiver bouton recommandations selon seuil 18/36
+    const bRec=document.querySelector('#page-5 .navb .btn.pri');
+    if(bRec){
+      const ok=n>=18;
+      bRec.disabled=!ok;
+      bRec.style.opacity=ok?'1':'0.45';
+      bRec.title=ok?'':'Répondez à au moins 18 affirmations RIASEC';
+    }
+  }
 }
 
 function buildContraintes(){
@@ -643,8 +608,11 @@ function gv(id){const el=document.getElementById(id);return el?el.value:'';}
 function calcRIASEC(){
   const RQ=mode==='orientation'?RQ_O:RQ_R;
   const sc={R:0,I:0,A:0,S:0,E:0,C:0};
-  RQ.forEach((q,i)=>{if(ans.r[i])sc[q[1]]+=ans.r[i];});
-  const n={};Object.keys(sc).forEach(k=>n[k]=Math.round(sc[k]/30*100));return n;
+  const cnt={R:0,I:0,A:0,S:0,E:0,C:0};
+  RQ.forEach((q,i)=>{if(ans.r[i]){sc[q[1]]+=ans.r[i];cnt[q[1]]++;}});
+  // Si une lettre n'a aucune réponse → score neutre 50 (évite faux zéro)
+  const n={};Object.keys(sc).forEach(k=>n[k]=cnt[k]>0?Math.round(sc[k]/30*100):50);
+  return n;
 }
 function calcV(){let s=0,c=0;VQ.forEach((_,i)=>{if(ans.v[i]){s+=ans.v[i];c++;}});return c?s/c/5:0.5;}
 function calcC(){const CQ=mode==='orientation'?CQ_O:CQ_R;let s=0,c=0;CQ.forEach((_,i)=>{if(ans.c[i]){s+=ans.c[i];c++;}});return c?s/c/5:0.5;}
@@ -677,6 +645,13 @@ function rmatch(r,riasec){
 }
 
 function compute(){
+  if(!mode){alert('Veuillez choisir un mode (Orientation ou Reconversion).');goStep(0);return;}
+  const RQcheck=mode==='orientation'?RQ_O:RQ_R;
+  const nAnswered=RQcheck.filter((_,i)=>ans.r[i]).length;
+  if(nAnswered<18){
+    if(!confirm('⚠️ Seulement '+nAnswered+'/36 affirmations RIASEC répondues.\nLes recommandations seront moins précises.\nContinuer quand même ?'))
+      {goStep(2);return;}
+  }
   const neuro=getNeuro();
   const riasec=calcRIASEC();
   const vs=calcV(),cs=calcC(),ms=calcM();
@@ -729,8 +704,20 @@ function compute(){
     }).sort((a,b)=>b.score-a.score);
   }
 
-  buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget);
-  goStep(6);
+  try{
+    buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget);
+    goStep(6);
+  }catch(err){
+    console.error('CONSENSIOO error:',err);
+    document.getElementById('rescontent').innerHTML=
+      '<div style="padding:32px;text-align:center">'+
+      '<div style="font-size:36px;margin-bottom:12px">⚠️</div>'+
+      '<div style="font-size:16px;font-weight:700;color:#c8281e;margin-bottom:8px">Une erreur est survenue</div>'+
+      '<div style="font-size:12px;color:#7b82a0;margin-bottom:16px">Rechargez la page et recommencez. Si le problème persiste, contactez le support.</div>'+
+      '<div style="font-family:monospace;font-size:10px;background:#f0f2f8;padding:8px;border-radius:6px;color:#c8281e">'+err.message+'</div>'+
+      '</div>';
+    goStep(6);
+  }
 }
 
 // ══ HELPERS AFFICHAGE ════════════════════════════════════════════
@@ -776,7 +763,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
   // TOP formations (orientation) ou TOP métiers (reconversion)
   if(isO){
     h+='<div class="card"><div class="ct">🎓 Top 10 Formations recommandées</div>';
-    h+='<table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Niveau</th><th>Sélectivité</th><th>Score</th><th>Insertion 18m</th><th>Résistance IA</th></tr></thead><tbody>';
+    h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Niveau</th><th>Sélectivité</th><th>Score</th><th>Insertion 18m</th><th>Résistance IA</th></tr></thead><tbody>';
     formations.slice(0,10).forEach((f,i)=>{
       const pct=Math.round(f.final*100);
       h+='<tr><td>'+rk(i)+'</td><td style="font-weight:500">'+f.nom+'</td>';
@@ -786,12 +773,12 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
       h+='<td style="font-family:var(--mono);font-size:11px">'+(f.taux_insertion?Math.round(f.taux_insertion*100)+'%':'—')+'</td>';
       h+='<td><span class="ib '+iaC(f.risque_ia||'Faible')+'">'+iaL(f.risque_ia||'Faible')+'</span></td></tr>';
     });
-    h+='</tbody></table></div>';
+    h+='</tbody></table></div></div>';
   }
 
   // TOP métiers
   h+='<div class="card"><div class="ct">💼 Top 10 '+(isO?'Métiers recommandés':'Métiers compatibles')+'</div>';
-  h+='<table class="rt"><thead><tr><th>#</th><th>Métier</th><th>Secteur</th><th>Score</th><th>Salaire médian</th><th>% Tâches auto.</th><th>Résistance IA</th></tr></thead><tbody>';
+  h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Métier</th><th>Secteur</th><th>Score</th><th>Salaire médian</th><th>% Tâches auto.</th><th>Résistance IA</th></tr></thead><tbody>';
   metiers.slice(0,10).forEach((m,i)=>{
     const pct=Math.round(m.final*100);
     h+='<tr><td>'+rk(i)+'</td><td style="font-weight:500">'+m.metier+'</td>';
@@ -801,12 +788,12 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
     h+='<td style="font-family:var(--mono);font-size:11px">'+(m.pct_auto||'—')+'</td>';
     h+='<td><span class="ib '+iaC(m.risque_ia||'Faible')+'">'+iaL(m.risque_ia||'Faible')+'</span></td></tr>';
   });
-  h+='</tbody></table></div>';
+  h+='</tbody></table></div></div>';
 
   // TOP formations reconversion
   if(!isO){
     h+='<div class="card"><div class="ct">📚 Top 10 Formations & VAE recommandées</div>';
-    h+='<table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Durée</th><th>Coût</th><th>CPF</th><th>Score</th><th>Résistance IA</th></tr></thead><tbody>';
+    h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Durée</th><th>Coût</th><th>CPF</th><th>Score</th><th>Résistance IA</th></tr></thead><tbody>';
     formations.slice(0,10).forEach((f,i)=>{
       const pct=Math.round(f.final*100);
       h+='<tr><td>'+rk(i)+'</td><td style="font-weight:500">'+f.nom+'</td>';
@@ -816,7 +803,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
       h+='<td><b style="font-family:var(--mono)">'+pct+'%</b></td>';
       h+='<td><span class="ib '+iaC(f.risque_ia||'Faible')+'">'+iaL(f.risque_ia||'Faible')+'</span></td></tr>';
     });
-    h+='</tbody></table></div>';
+    h+='</tbody></table></div></div>';
   }
 
   // Entrepreneuriat (reconversion seulement)
@@ -831,7 +818,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
       h+='<td style="font-size:11px;color:var(--blue)">'+e.aides+'</td>';
       h+='<td><b style="font-family:var(--mono)">'+pct+'%</b></td></tr>';
     });
-    h+='</tbody></table></div>';
+    h+='</tbody></table></div></div>';
   }
 
   // Scénarios
@@ -849,7 +836,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
     h+='<tr><td><strong>🥈 Entrepreneurial</strong><br><small style="color:var(--muted)">Reconversion → '+typeEntrepr+'</small></td><td>'+f2.nom+'</td><td>'+m2.metier+(m2.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m2.salaire/1000)+'k€)</span>':'')+'</td><td>'+f2.duree+' mois</td><td>'+fmtE(f2.cout)+'</td><td><span class="ib '+iaC(m2.risque_ia||'Faible')+'">'+iaL(m2.risque_ia||'Faible')+'</span></td></tr>';
     h+='<tr><td><strong>🥉 Sécurisé</strong><br><small style="color:var(--muted)">Évolution + montée en compétences</small></td><td>'+f3.nom+'</td><td>'+m3.metier+(m3.salaire?' <span style="font-size:10px;color:var(--muted)">('+Math.round(m3.salaire/1000)+'k€)</span>':'')+'</td><td>'+f3.duree+' mois</td><td>'+fmtE(f3.cout)+'</td><td><span class="ib if2">🟢 Faible</span></td></tr>';
   }
-  h+='</tbody></table></div>';
+  h+='</tbody></table></div></div>';
 
   // Dispositifs publics (reconversion)
   if(!isO&&DB.reconversion.dispositifs){
@@ -894,31 +881,56 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
 
   document.getElementById('rescontent').innerHTML=h;
 
-  // Radar Chart
+  // Radar Chart — fallback SVG si Chart.js CDN indisponible
   setTimeout(()=>{
+    const vals=[riasec.R,riasec.I,riasec.A,riasec.S,riasec.E,riasec.C];
+    const lbls=['R','I','A','S','E','C'];
+    const lblFull=['Réaliste','Investigateur','Artistique','Social','Entreprenant','Conventionnel'];
+    const wrap=document.querySelector('.cw');
+    if(!wrap)return;
+    if(window.CHART_FAILED||typeof Chart==='undefined'){
+      // SVG radar natif
+      const N=6,CX=160,CY=145,R=105;
+      const angle=i=>Math.PI*2*i/N-Math.PI/2;
+      const pt=(r,i)=>[CX+Math.cos(angle(i))*r,CY+Math.sin(angle(i))*r];
+      const rings=[25,50,75,100].map(r=>`<polygon points="${lbls.map((_,i)=>pt(r,i).join(',')).join(' ')}" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="1"/>`).join('');
+      const axes=lbls.map((_,i)=>`<line x1="${CX}" y1="${CY}" x2="${pt(R,i)[0]}" y2="${pt(R,i)[1]}" stroke="rgba(0,0,0,.08)" stroke-width="1.5"/>`).join('');
+      const dpts=vals.map((v,i)=>pt(v/100*R,i));
+      const dpoly=`<polygon points="${dpts.map(p=>p.join(',')).join(' ')}" fill="rgba(0,85,255,.13)" stroke="#0055ff" stroke-width="2"/>`;
+      const dots=dpts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#0055ff"/>`).join('');
+      const labels=lbls.map((l,i)=>{const p=pt(R+22,i);return`<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#4b5263">${l}</text><text x="${p[0]}" y="${p[1]+14}" text-anchor="middle" font-size="10" fill="#7b82a0">${vals[i]}</text>`;}).join('');
+      wrap.innerHTML=`<svg viewBox="0 0 320 290" style="width:100%;max-height:240px">${rings}${axes}${dpoly}${dots}${labels}</svg>`;
+      return;
+    }
     const ctx=document.getElementById('rc');
     if(!ctx)return;
     if(radarChart)radarChart.destroy();
     radarChart=new Chart(ctx,{type:'radar',data:{
-      labels:['Réaliste (R)','Investigateur (I)','Artistique (A)','Social (S)','Entreprenant (E)','Conventionnel (C)'],
-      datasets:[{label:'RIASEC',data:[riasec.R,riasec.I,riasec.A,riasec.S,riasec.E,riasec.C],
+      labels:lblFull.map((l,i)=>l+' ('+lbls[i]+')'),
+      datasets:[{label:'RIASEC',data:vals,
         backgroundColor:'rgba(0,85,255,0.10)',borderColor:'#0055ff',borderWidth:2,
         pointBackgroundColor:'#0055ff',pointRadius:4}]
     },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{r:{min:0,max:100,ticks:{display:false,backdropColor:'transparent'},
         grid:{color:'rgba(0,0,0,.06)'},angleLines:{color:'rgba(0,0,0,.06)'},
         pointLabels:{color:'#7b82a0',font:{size:10}}}}}});
-  },100);
+  },150);
 }
 
 function resetAll(){
   mode=null;Object.keys(ans).forEach(k=>{ans[k]={};});
   document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  document.querySelectorAll('input[type=checkbox]').forEach(c=>{if(c.closest('#neuro-grid'))c.checked=false;});
   document.getElementById('mc-o').classList.remove('selected');
   document.getElementById('mc-r').classList.remove('selected');
   document.getElementById('btn-next0').disabled=true;
   document.getElementById('mlabel').textContent='Mode : —';
+  document.getElementById('rp').textContent='0 / 36 répondus';
+  document.getElementById('rpf').style.width='0%';
+  document.getElementById('rescontent').innerHTML='';
   if(radarChart){radarChart.destroy();radarChart=null;}
+  const bRec=document.querySelector('#page-5 .navb .btn.pri');
+  if(bRec){bRec.disabled=true;bRec.style.opacity='0.45';}
   goStep(0);
 }
 
