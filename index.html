@@ -808,7 +808,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
 
   // Entrepreneuriat (reconversion seulement)
   if(!isO&&entrepreneuriat.length){
-    h+='<div class="card"><div class="ct">🚀 Pistes entrepreneuriales</div>';
+    h+='<div class="card"><div class="ct">🚀 Pistes entrepreneuriales</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Structures juridiques adaptées à votre profil et votre tolérance au risque. À affiner avec un conseiller juridique ou la CCI.</div>';
     h+='<table class="rt"><thead><tr><th>#</th><th>Type</th><th>Modèle</th><th>Capital requis</th><th>Aides disponibles</th><th>Score</th></tr></thead><tbody>';
     entrepreneuriat.slice(0,5).forEach((e,i)=>{
       const pct=Math.round(e.score*100);
@@ -898,7 +898,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
     ?[['🥇 Optimal','Formation → Métier cible'],['🥈 Alternatif','Formation différente → Métier compatible'],['🥉 Sécurisé','Formation courte → Accès rapide']]
     :[['🥇 Optimal','Métier → Formation → Métier cible'],['🥈 Alternatif','Formation différente → Nouveau métier'],['🥉 Sécurisé','Formation CPF courte → Métier résistant IA']];
 
-  h+='<div class="card"><div class="ct">🗺️ 3 Scénarios de parcours</div><div class="rt-wrap">';
+  h+='<div class="card"><div class="ct">🗺️ 3 Scénarios de parcours</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">'+(isO?'Chaque scénario associe une formation à son métier cible naturel — même univers sectoriel et RIASEC.':'Chaque scénario associe une formation à son métier cible. Formation et métier partagent le même univers sectoriel.')+'</div><div class="rt-wrap">';
   h+='<table class="rt"><thead><tr><th>Scénario</th><th>Formation</th><th>Métier cible</th><th>Durée</th><th>Coût</th><th>Risque IA</th></tr></thead><tbody>';
   scenes.forEach((sc,i)=>{
     const [lbl,sub]=scLabels[i]||['Scénario',''];
@@ -918,7 +918,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
 
   // Dispositifs publics (reconversion)
   if(!isO&&DB.reconversion.dispositifs){
-    h+='<div class="card"><div class="ct">🏛️ Dispositifs publics mobilisables</div>';
+    h+='<div class="card"><div class="ct">🏛️ Dispositifs publics mobilisables</div><div style=\'font-size:11px;color:var(--muted);margin:4px 0 10px\'>Aides financières mobilisables selon votre situation. À vérifier avec France Travail ou un conseiller CPF.</div>';
     DB.reconversion.dispositifs.forEach(d=>{
       h+='<div class="disp-card"><div><div class="disp-nom">'+d.nom+'</div><div class="disp-org">'+d.org+'</div></div><div class="disp-mont">'+d.montant+'</div></div>';
     });
@@ -926,7 +926,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
   }
 
   // Anti-biais
-  h+='<div class="card"><div class="ct">⚠️ Anti-biais & Explicabilité</div>';
+  h+='<div class="card"><div class="ct">⚠️ Anti-biais & Explicabilité</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Détection automatique des biais pouvant fausser les recommandations. Points d\'attention à croiser avec le consultant.</div>';
   const budgetSaisi=con.budget||0;
   const distSaisie=parseFloat(gv('cd'))||999;
   if(isO&&budgetSaisi>0&&budgetSaisi<5000)
