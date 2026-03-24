@@ -489,21 +489,21 @@ metiers:[
 {code:"E1103",metier:"Journaliste / Rédacteur·trice",secteur:"Médias / Communication",riasec:"AES",salaire:30000,taux_emploi:0.58,risque_ia:"Fort",score_ia:0.4,pct_auto:"65%"},
 ],
 formations:[
-{nom:"Titre Pro Développeur·se Web",duree:6,cout:3500,cpf:"Oui",niveau:"Niveau 5 (Bac+2)",score_ia:1,taux_insertion:0.88},
-{nom:"BTS Manager Commercial (VAE)",duree:12,cout:4000,cpf:"Oui",niveau:"Niveau 5 (Bac+2)",score_ia:0.6,taux_insertion:0.74},
-{nom:"Licence Pro Management",duree:12,cout:5000,cpf:"Partiel",niveau:"Niveau 6 (Bac+3)",score_ia:0.6,taux_insertion:0.78},
-{nom:"MBA Management et Stratégie",duree:18,cout:12000,cpf:"Partiel",niveau:"Niveau 7 (Bac+5)",score_ia:1,taux_insertion:0.85},
-{nom:"CQP Infirmier·ière (VAE)",duree:24,cout:2000,cpf:"Non",niveau:"Niveau 6",score_ia:1,taux_insertion:0.95},
-{nom:"Formation Data Analyst",duree:6,cout:4500,cpf:"Oui",niveau:"Niveau 5",score_ia:0.8,taux_insertion:0.87},
-{nom:"Certification PMP (Gestion de projet)",duree:3,cout:2500,cpf:"Oui",niveau:"Certification",score_ia:0.85,taux_insertion:0.82},
-{nom:"Titre Pro Coach Professionnel",duree:12,cout:6000,cpf:"Oui",niveau:"Niveau 6",score_ia:0.9,taux_insertion:0.72},
-{nom:"CAP Électricien·ne",duree:12,cout:1500,cpf:"Oui",niveau:"Niveau 3 (CAP)",score_ia:0.85,taux_insertion:0.88},
-{nom:"Titre Pro Formateur·trice",duree:9,cout:3000,cpf:"Oui",niveau:"Niveau 5",score_ia:0.85,taux_insertion:0.78},
-{nom:"Titre Pro Assistant·e Ressources Humaines",duree:9,cout:3200,cpf:"Oui",niveau:"Niveau 5",score_ia:0.6,taux_insertion:0.74},
-{nom:"BTS Énergies Renouvelables",duree:24,cout:600,cpf:"Non",niveau:"Niveau 5 (Bac+2)",score_ia:0.9,taux_insertion:0.82},
-{nom:"Formation Permaculture / Maraîchage Bio",duree:9,cout:3500,cpf:"Oui",niveau:"Certification",score_ia:0.95,taux_insertion:0.70},
-{nom:"Certification Coach (ICF)",duree:12,cout:5500,cpf:"Partiel",niveau:"Certification",score_ia:0.9,taux_insertion:0.72},
-{nom:"Master Design de Services / UX",duree:24,cout:8000,cpf:"Non",niveau:"Niveau 7 (Bac+5)",score_ia:0.65,taux_insertion:0.80},
+{nom:"Titre Pro Développeur·se Web",duree:6,cout:3500,cpf:"Oui",niveau:"Niveau 5 (Bac+2)",score_ia:1,taux_insertion:0.88,riasec:"IRC"},
+{nom:"BTS Manager Commercial (VAE)",duree:12,cout:4000,cpf:"Oui",niveau:"Niveau 5 (Bac+2)",score_ia:0.6,taux_insertion:0.74,riasec:"ESC"},
+{nom:"Licence Pro Management",duree:12,cout:5000,cpf:"Partiel",niveau:"Niveau 6 (Bac+3)",score_ia:0.6,taux_insertion:0.78,riasec:"ECS"},
+{nom:"MBA Management et Stratégie",duree:18,cout:12000,cpf:"Partiel",niveau:"Niveau 7 (Bac+5)",score_ia:1,taux_insertion:0.85,riasec:"ECS"},
+{nom:"CQP Infirmier·ière (VAE)",duree:24,cout:2000,cpf:"Non",niveau:"Niveau 6",score_ia:1,taux_insertion:0.95,riasec:"SRI"},
+{nom:"Formation Data Analyst",duree:6,cout:4500,cpf:"Oui",niveau:"Niveau 5",score_ia:0.8,taux_insertion:0.87,riasec:"ICS"},
+{nom:"Certification PMP (Gestion de projet)",duree:3,cout:2500,cpf:"Oui",niveau:"Certification",score_ia:0.85,taux_insertion:0.82,riasec:"ECS"},
+{nom:"Titre Pro Coach Professionnel",duree:12,cout:6000,cpf:"Oui",niveau:"Niveau 6",score_ia:0.9,taux_insertion:0.72,riasec:"SIA"},
+{nom:"CAP Électricien·ne",duree:12,cout:1500,cpf:"Oui",niveau:"Niveau 3 (CAP)",score_ia:0.85,taux_insertion:0.88,riasec:"RIC"},
+{nom:"Titre Pro Formateur·trice",duree:9,cout:3000,cpf:"Oui",niveau:"Niveau 5",score_ia:0.85,taux_insertion:0.78,riasec:"SAE"},
+{nom:"Titre Pro Assistant·e Ressources Humaines",duree:9,cout:3200,cpf:"Oui",niveau:"Niveau 5",score_ia:0.6,taux_insertion:0.74,riasec:"SEC"},
+{nom:"BTS Énergies Renouvelables",duree:24,cout:600,cpf:"Non",niveau:"Niveau 5 (Bac+2)",score_ia:0.9,taux_insertion:0.82,riasec:"RIC"},
+{nom:"Formation Permaculture / Maraîchage Bio",duree:9,cout:3500,cpf:"Oui",niveau:"Certification",score_ia:0.95,taux_insertion:0.70,riasec:"RAI"},
+{nom:"Certification Coach (ICF)",duree:12,cout:5500,cpf:"Partiel",niveau:"Certification",score_ia:0.9,taux_insertion:0.72,riasec:"SIA"},
+{nom:"Master Design de Services / UX",duree:24,cout:8000,cpf:"Non",niveau:"Niveau 7 (Bac+5)",score_ia:0.65,taux_insertion:0.80,riasec:"ACE"},
 ],
 entrepreneuriat:[
 {type:"Micro-entrepreneur",modele:"Services / Vente directe",capital:"0–5 000 €",aides:"ACRE, ARCE, PCE"},
@@ -722,9 +722,14 @@ function compute(){
     const sNeuroF=(scoreNeuro(f.domaine||'',neuro)+1)/2;
     const wNF=neuro.length>0?0.10:0;
     const wBF=1-wNF;
+    // RIASEC dominant (40%) — évite formations incompatibles avec le profil
+    // Orientation : RIASEC 40% + sélectivité 20% + insertion 15% + budget 15% + IA 10%
+    // Reconversion : RIASEC 40% + budget 20% + durée 15% + insertion 15% + IA 10%
+    // Malus fort si match RIASEC très faible (< 0.25) — évite formations hors profil
+    const riasecMalus = sR < 0.25 ? 0.40 : sR < 0.40 ? 0.70 : 1.0;
     const final=mode==='orientation'
-      ?((sR*0.20+sI*0.20+sBudget*0.20+sSel*0.20+sIA*0.20)*wBF+sNeuroF*wNF)
-      :((sR*0.15+sI*0.20+sBudget*0.25+sDur*0.10+sIA*0.30)*wBF+sNeuroF*wNF);
+      ?((sR*0.40+sI*0.15+sBudget*0.15+sSel*0.20+sIA*0.10)*wBF+sNeuroF*wNF)*riasecMalus
+      :((sR*0.40+sI*0.15+sBudget*0.20+sDur*0.15+sIA*0.10)*wBF+sNeuroF*wNF)*riasecMalus;
     return{...f,sR,sI,sBudget,sIA,final};
   }).sort((a,b)=>b.final-a.final);
 
