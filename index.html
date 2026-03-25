@@ -751,7 +751,7 @@ function compute(){
 
   const secteurActuel=(document.getElementById('pse')&&document.getElementById('pse').value)||'';
 
-  const metiers=db.metiers.map(m=>{
+  const _metiersBruts=db.metiers.map(m=>{
     const sR=rmatch(riasec,m.riasec),sV=vs,sC=cs,sI=m.taux_emploi,sIA=m.score_ia;
     // Score compétences : en reconversion, on intègre le score sectoriel déclaré (60%) + score global (40%)
     const sCompSect=mode==='reconversion'?calcCompSecteur(m.secteur):cs;
@@ -782,9 +782,18 @@ function compute(){
     const rawFinalM = rawFinal * riasecMalusM * reqMalus * compSectMalus * dureeMinMalus;
     const finalScore=mode==='reconversion'?Math.min(1,rawFinalM+memeCode+secteurBonus):rawFinalM;
     return{...m,final:finalScore,memeCode,secteurBonus,sCompSect};
-  }).filter(m=>m.final>0.28).sort((a,b)=>b.final-a.final);
+  }).sort((a,b)=>b.final-a.final);
 
-  const formations=db.formations.map(f=>{
+  // Seuil dynamique : garantir au moins 7 métiers affichés
+  const SEUILS_M=[0.35,0.28,0.22,0.15,0.08];
+  let metiers=[];
+  for(const seuil of SEUILS_M){
+    metiers=_metiersBruts.filter(m=>m.final>seuil);
+    if(metiers.length>=7) break;
+  }
+  if(metiers.length===0) metiers=_metiersBruts.slice(0,10);
+
+  const _formationsBrutes=db.formations.map(f=>{
     const sR=rmatch(riasec,f.riasec||'');
     const sI=f.taux_insertion||0.5;
     const sBudget=f.cout<=budget?1:Math.max(0,1-((f.cout-budget)/Math.max(budget,1)));
@@ -805,14 +814,23 @@ function compute(){
     const fReqScore = f.req ? (riasec[f.req]||0)/100 : 1;
     const fReqMalus = f.req && fReqScore < 0.45 ? 0.15 : 1.0;
     // Malus compétences sectorielles faibles pour la formation (reconversion)
-    const sCompSectF=mode==='reconversion'?calcCompSecteur(f.riasec||''):cs;
+    const sCompSectF=mode==='reconversion'?calcCompSecteur(f.domaine||f.secteur||''):cs;
     const compSectFMalus=mode==='reconversion'&&sCompSectF<0.25?0.65:1.0;
     const raw=mode==='orientation'
       ?(sR*0.40+sI*0.15+sBudget*0.15+sSel*0.20+sIA*0.10)
       :(sR*0.35+sI*0.15+sBudget*0.20+sDur*0.15+sIA*0.15);
     const final=((raw*wBF+sNeuroF*wNF)*riasecMalus*fReqMalus*cpfMalus*dureeDepasseMalus*compSectFMalus);
     return{...f,sR,sI,sBudget,sIA,final};
-  }).filter(f=>f.final>0.18).sort((a,b)=>b.final-a.final);
+  }).sort((a,b)=>b.final-a.final);
+
+  // Seuil dynamique formations : garantir au moins 5 formations affichées
+  const SEUILS_F=[0.30,0.22,0.15,0.08];
+  let formations=[];
+  for(const seuil of SEUILS_F){
+    formations=_formationsBrutes.filter(f=>f.final>seuil);
+    if(formations.length>=5) break;
+  }
+  if(formations.length===0) formations=_formationsBrutes.slice(0,5);
 
   // Entrepreneuriat (reconversion)
   let entrepreneuriat=[];
