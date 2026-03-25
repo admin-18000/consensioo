@@ -761,22 +761,28 @@ function compute(){
     const wBase=1-wN;
     const memeCode=metierActuel&&m.code&&metierActuel.toUpperCase().includes(m.code)?0.05:0;
     const secteurBonus=secteurActuel&&m.secteur&&m.secteur.split('/').some(s=>secteurActuel.toLowerCase().includes(s.trim().toLowerCase()))?0.03:0;
-    const rawFinal=(sR*0.30+sV*0.12+sCompFinal*0.18+sI*0.20+sIA*0.20)*wBase + sNeuro*wN;
-    // Malus RIASEC incompatible
-    const riasecMalusM = sR < 0.20 ? 0.30 : sR < 0.40 ? 0.60 : 1.0;
+    // Reconversion : RIASEC 35% + compétences sectorielles 20% + insertion 20% + IA 15% + valeurs 10%
+    // Orientation  : RIASEC 30% + compétences 15% + insertion 20% + IA 20% + valeurs 15%
+    const rawFinal = mode==='reconversion'
+      ? (sR*0.35 + sCompFinal*0.20 + sI*0.20 + sIA*0.15 + sV*0.10)*wBase + sNeuro*wN
+      : (sR*0.30 + sCompFinal*0.15 + sI*0.20 + sIA*0.20 + sV*0.15)*wBase + sNeuro*wN;
+    // Malus RIASEC incompatible — renforcé en reconversion
+    const riasecMalusM = mode==='reconversion'
+      ? (sR < 0.15 ? 0.20 : sR < 0.30 ? 0.45 : sR < 0.50 ? 0.75 : 1.0)
+      : (sR < 0.20 ? 0.30 : sR < 0.40 ? 0.60 : 1.0);
     // Malus lettre requise absente
     const reqScore = m.req ? (riasec[m.req]||0)/100 : 1;
     const reqMalus = m.req && reqScore < 0.45 ? 0.15 : 1.0;
-    // Malus compétences sectorielles faibles (reconversion uniquement)
-    const compSectMalus = mode==='reconversion' && sCompSect < 0.20 ? 0.20
-                        : mode==='reconversion' && sCompSect < 0.35 ? 0.50
-                        : mode==='reconversion' && sCompSect < 0.50 ? 0.78 : 1.0;
+    // Malus compétences sectorielles faibles (reconversion uniquement) — renforcé
+    const compSectMalus = mode==='reconversion' && sCompSect < 0.20 ? 0.18
+                        : mode==='reconversion' && sCompSect < 0.35 ? 0.45
+                        : mode==='reconversion' && sCompSect < 0.50 ? 0.72 : 1.0;
     // Malus durée de formation requise trop longue vs durMax déclaré
     const dureeMinMalus = (mode==='reconversion' && m.duree_min_formation && m.duree_min_formation > durMax) ? 0.08 : 1.0;
     const rawFinalM = rawFinal * riasecMalusM * reqMalus * compSectMalus * dureeMinMalus;
     const finalScore=mode==='reconversion'?Math.min(1,rawFinalM+memeCode+secteurBonus):rawFinalM;
     return{...m,final:finalScore,memeCode,secteurBonus,sCompSect};
-  }).filter(m=>m.final>0.38).sort((a,b)=>b.final-a.final);
+  }).filter(m=>m.final>0.28).sort((a,b)=>b.final-a.final);
 
   const formations=db.formations.map(f=>{
     const sR=rmatch(riasec,f.riasec||'');
@@ -806,15 +812,38 @@ function compute(){
       :(sR*0.35+sI*0.15+sBudget*0.20+sDur*0.15+sIA*0.15);
     const final=((raw*wBF+sNeuroF*wNF)*riasecMalus*fReqMalus*cpfMalus*dureeDepasseMalus*compSectFMalus);
     return{...f,sR,sI,sBudget,sIA,final};
-  }).filter(f=>f.final>0.25).sort((a,b)=>b.final-a.final);
+  }).filter(f=>f.final>0.18).sort((a,b)=>b.final-a.final);
 
   // Entrepreneuriat (reconversion)
   let entrepreneuriat=[];
   if(mode==='reconversion'&&db.entrepreneuriat){
     const risqTol=con.risq==='fort'?1:con.risq==='moyen'?0.6:0.2;
     const objS=con.obj==='entrepreneur'?1:con.obj==='independant'?0.8:con.obj==='mixte'?0.5:0.2;
+    // Score E (Entreprenant) du profil RIASEC — clé pour l'entrepreneuriat
+    const scoreE=(riasec['E']||0)/100;
+    const scoreS=(riasec['S']||0)/100;
+    // Profil entrepreneur : score E fort + appétence risque fort
+    // Chaque type de structure a son propre profil de risque et d'autonomie
+    const ENTRO_PROFIL={
+      'Micro-entrepreneur':      {risqNeed:0.1, objNeed:'independant', riasecBoost:'E', capital:'faible'},
+      'Freelance / Indépendant': {risqNeed:0.2, objNeed:'independant', riasecBoost:'E', capital:'faible'},
+      'Startup':                 {risqNeed:0.8, objNeed:'entrepreneur', riasecBoost:'E', capital:'fort'},
+      'PME / Franchise':         {risqNeed:0.6, objNeed:'entrepreneur', riasecBoost:'E', capital:'fort'},
+      'SCOP / Coopérative':      {risqNeed:0.3, objNeed:'mixte',        riasecBoost:'S', capital:'moyen'},
+      'Activité hybride (salariat + indépendant)':{risqNeed:0.2, objNeed:'mixte', riasecBoost:'E', capital:'faible'},
+      'Reprise d\'entreprise':   {risqNeed:0.7, objNeed:'entrepreneur', riasecBoost:'E', capital:'fort'},
+    };
     entrepreneuriat=db.entrepreneuriat.map(e=>{
-      const score=(risqTol*0.40+objS*0.40+ms*0.20);
+      const profil=ENTRO_PROFIL[e.type]||{risqNeed:0.5,objNeed:'mixte',riasecBoost:'E',capital:'moyen'};
+      // Adéquation risque : plus le profil est proche du niveau de risque requis, meilleur le score
+      const risqMatch=1-Math.abs(risqTol-profil.risqNeed);
+      // Adéquation objectif
+      const objMatch=con.obj===profil.objNeed?1:con.obj==='mixte'?0.6:0.3;
+      // Adéquation RIASEC : letter boost
+      const riasecLetter=profil.riasecBoost==='S'?scoreS:scoreE;
+      // Adéquation capital : pénalise les structures chères si budget limité
+      const capitalMalus=profil.capital==='fort'&&budget<10000?0.40:profil.capital==='moyen'&&budget<3000?0.60:1.0;
+      const score=Math.min(1,(risqMatch*0.35+objMatch*0.35+riasecLetter*0.20+ms*0.10)*capitalMalus);
       return{...e,score};
     }).sort((a,b)=>b.score-a.score);
   }
