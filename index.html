@@ -779,12 +779,15 @@ function compute(){
                         : mode==='reconversion' && sCompSect < 0.50 ? 0.72 : 1.0;
     // Malus durée de formation requise trop longue vs durMax déclaré
     const dureeMinMalus = (mode==='reconversion' && m.duree_min_formation && m.duree_min_formation > durMax) ? 0.08 : 1.0;
-    const rawFinalM = rawFinal * riasecMalusM * reqMalus * compSectMalus * dureeMinMalus;
+    // Malus risque IA Fort — un métier très exposé à l'IA pénalisé en score final
+    const iaMalus = m.risque_ia==='Fort' ? 0.55 : m.risque_ia==='Moyen' ? 0.85 : 1.0;
+    const rawFinalM = rawFinal * riasecMalusM * reqMalus * compSectMalus * dureeMinMalus * iaMalus;
     const finalScore=mode==='reconversion'?Math.min(1,rawFinalM+memeCode+secteurBonus):rawFinalM;
     return{...m,final:finalScore,memeCode,secteurBonus,sCompSect};
   }).sort((a,b)=>b.final-a.final);
 
   // Seuil dynamique : garantir au moins 7 métiers affichés
+  // Mais jamais un métier dont le score combiné RIASEC+compétences est aberrant
   const SEUILS_M=[0.35,0.28,0.22,0.15,0.08];
   let metiers=[];
   for(const seuil of SEUILS_M){
@@ -792,6 +795,9 @@ function compute(){
     if(metiers.length>=7) break;
   }
   if(metiers.length===0) metiers=_metiersBruts.slice(0,10);
+  // Toujours exclure les métiers risque IA Fort si suffisamment de résultats sans eux
+  const sansIaFort=metiers.filter(m=>m.risque_ia!=='Fort');
+  if(sansIaFort.length>=5) metiers=sansIaFort;
 
   const _formationsBrutes=db.formations.map(f=>{
     const sR=rmatch(riasec,f.riasec||'');
@@ -824,6 +830,7 @@ function compute(){
   }).sort((a,b)=>b.final-a.final);
 
   // Seuil dynamique formations : garantir au moins 5 formations affichées
+  const DOMAINES_MANUELS=['Agriculture','Artisanat / BTP','Énergie / Environnement'];
   const SEUILS_F=[0.30,0.22,0.15,0.08];
   let formations=[];
   for(const seuil of SEUILS_F){
@@ -831,6 +838,12 @@ function compute(){
     if(formations.length>=5) break;
   }
   if(formations.length===0) formations=_formationsBrutes.slice(0,5);
+  // Exclure formations manuelles/agricoles si le profil RIASEC n'a pas R fort ET suffisamment d'autres résultats
+  const scoreR=riasec['R']||0;
+  if(scoreR<50){
+    const sansManuel=formations.filter(f=>!DOMAINES_MANUELS.some(d=>f.domaine&&f.domaine.includes(d)));
+    if(sansManuel.length>=4) formations=sansManuel;
+  }
 
   // Entrepreneuriat (reconversion)
   let entrepreneuriat=[];
@@ -912,7 +925,7 @@ function buildResults(riasec,metiers,formations,entrepreneuriat,con,vs,cs,budget
   else if(secteurActuelDisplay) h+=' · Secteur actuel : <strong>'+secteurActuelDisplay+'</strong>';
   h+=' · Code RIASEC dominant : <strong>'+top3+'</strong>';
   h+='</div>';
-  h+='<div class="vbs">'+(isO?'Outil Orientation':'Outil Reconversion')+' · '+metiers.length+' métiers · '+formations.length+' formations analysés · <span style="color:#f59e0b;font-weight:700">⭐ Accès Fondateur</span></div>';
+  h+='<div class="vbs">'+(isO?'Outil Orientation':'Outil Reconversion')+' · <strong>'+metiers.length+'</strong> métier'+(metiers.length>1?'s':'')+' · <strong>'+formations.length+'</strong> formation'+(formations.length>1?'s':'')+' identifié'+(formations.length>1?'s':'')+' · <span style="color:#f59e0b;font-weight:700">⭐ Accès Fondateur</span></div>';
 h+='<div style="font-size:11px;color:var(--muted);margin-top:4px">📋 Ces résultats sont un point de départ — un entretien avec un consultant affine et humanise votre trajectoire.</div>';
   h+='</div></div>';
 
@@ -925,7 +938,8 @@ h+='<div style="font-size:11px;color:var(--muted);margin-top:4px">📋 Ces résu
 
   // TOP formations (orientation) ou TOP métiers (reconversion)
   if(isO){
-    h+='<div class="card"><div class="ct">🎓 Top 10 Formations recommandées</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Classées selon votre profil RIASEC, vos contraintes et vos objectifs. Chaque formation mène vers un ou plusieurs métiers compatibles.</div>';
+    const nFO=Math.min(formations.length,10);
+    h+='<div class="card"><div class="ct">🎓 Top '+nFO+' Formation'+(nFO>1?'s':'')+' recommandée'+(nFO>1?'s':'')+'</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Classées selon votre profil RIASEC, vos contraintes et vos objectifs. Chaque formation mène vers un ou plusieurs métiers compatibles.</div>';
     h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Niveau</th><th>Sélectivité</th><th>Score</th><th>Insertion 18m</th><th>Résistance IA</th></tr></thead><tbody>';
     formations.slice(0,10).forEach((f,i)=>{
       const pct=Math.round(f.final*100);
@@ -940,12 +954,12 @@ h+='<div style="font-size:11px;color:var(--muted);margin-top:4px">📋 Ces résu
   }
 
   // TOP métiers
-  h+='<div class="card"><div class="ct">💼 Top 10 '+(isO?'Métiers recommandés':'Métiers compatibles')+'</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">'+(isO?'Métiers correspondant à votre profil RIASEC et vos valeurs. À croiser avec vos formations pour construire votre parcours.':'Métiers compatibles avec votre profil et vos compétences déclarées. Les scénarios ci-dessous montrent quelle formation y mène.')+'</div>';
+  const nM=Math.min(metiers.length,10);
+  h+='<div class="card"><div class="ct">💼 Top '+nM+' Métier'+(nM>1?'s':'')+' '+(isO?'recommandé'+(nM>1?'s':''):'compatible'+(nM>1?'s':''))+'</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">'+(isO?'Métiers correspondant à votre profil RIASEC et vos valeurs. À croiser avec vos formations pour construire votre parcours.':'Métiers compatibles avec votre profil et vos compétences déclarées. Les scénarios ci-dessous montrent quelle formation y mène.')+'</div>';
   h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Métier</th><th>Secteur</th><th>Score</th><th>Salaire médian</th><th>% Tâches auto.</th><th>Résistance IA</th></tr></thead><tbody>';
   metiers.slice(0,10).forEach((m,i)=>{
     const pct=Math.round(m.final*100);
     h+='<tr><td>'+rk(i)+'</td>';
-    // Nom + note reconversion si présente
     const noteRec=!isO&&m.note_reconversion?'<div style="font-size:9px;color:#d47000;margin-top:2px">'+m.note_reconversion+'</div>':'';
     h+='<td style="font-weight:500">'+m.metier+noteRec+'</td>';
     h+='<td style="font-size:11px;color:var(--muted)">'+m.secteur+'</td>';
@@ -958,7 +972,8 @@ h+='<div style="font-size:11px;color:var(--muted);margin-top:4px">📋 Ces résu
 
   // TOP formations reconversion
   if(!isO){
-    h+='<div class="card"><div class="ct">📚 Top 10 Formations & VAE recommandées</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Classées selon votre profil RIASEC, vos contraintes (budget, durée, CPF) et vos compétences déclarées. Les <strong>3 scénarios ci-dessous</strong> montrent quelle formation mène à quel métier cible.</div>';
+    const nFR=Math.min(formations.length,10);
+    h+='<div class="card"><div class="ct">📚 Top '+nFR+' Formation'+(nFR>1?'s':'')+' & VAE recommandée'+(nFR>1?'s':'')+'</div><div style="font-size:11px;color:var(--muted);margin:4px 0 10px">Classées selon votre profil RIASEC, vos contraintes (budget, durée, CPF) et vos compétences déclarées. Les <strong>3 scénarios ci-dessous</strong> montrent quelle formation mène à quel métier cible.</div>';
     h+='<div class="rt-wrap"><table class="rt"><thead><tr><th>#</th><th>Formation</th><th>Durée</th><th>Coût</th><th>CPF</th><th>Score</th><th>Résistance IA</th></tr></thead><tbody>';
     formations.slice(0,10).forEach((f,i)=>{
       const pct=Math.round(f.final*100);
