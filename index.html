@@ -321,7 +321,7 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
   <div class="b2c-notif" style="margin:18px 0 0;border-color:rgba(251,191,36,.3);background:linear-gradient(135deg,rgba(251,191,36,.07),rgba(30,58,138,.06))">
     <div class="b2c-notif-ico">⭐</div>
     <div><strong style="color:#92400e">Vous venez d'utiliser CONSENSIOO en accès Fondateur</strong><br>
-    Cet outil sera bientôt proposé en abonnement Premium. En tant que testeur Fondateur, vous bénéficiez aujourd'hui d'un accès complet, sans frais.</strong><br><span onclick="goStep(7)" style="font-size:11px;color:#2563eb;cursor:pointer;text-decoration:underline">→ Voir la grille tarifaire (ouverture avril)</span></div>
+    Cet outil sera bientôt proposé en abonnement Premium. En tant que testeur Fondateur, vous bénéficiez aujourd'hui d'un accès complet, sans frais.<br><span onclick="goStep(7)" style="font-size:11px;color:#2563eb;cursor:pointer;text-decoration:underline">→ Voir la grille tarifaire (ouverture avril)</span></div>
   </div>
   
   </div>
@@ -779,9 +779,8 @@ function compute(){
                         : mode==='reconversion' && sCompSect < 0.50 ? 0.72 : 1.0;
     // Malus durée de formation requise trop longue vs durMax déclaré
     const dureeMinMalus = (mode==='reconversion' && m.duree_min_formation && m.duree_min_formation > durMax) ? 0.08 : 1.0;
-    // Malus risque IA Fort — un métier très exposé à l'IA pénalisé en score final
-    const iaMalus = m.risque_ia==='Fort' ? 0.55 : m.risque_ia==='Moyen' ? 0.85 : 1.0;
-    const rawFinalM = rawFinal * riasecMalusM * reqMalus * compSectMalus * dureeMinMalus * iaMalus;
+    // Risque IA déjà intégré via score_ia dans la formule pondérée — pas de double pénalité
+    const rawFinalM = rawFinal * riasecMalusM * reqMalus * compSectMalus * dureeMinMalus;
     const finalScore=mode==='reconversion'?Math.min(1,rawFinalM+memeCode+secteurBonus):rawFinalM;
     return{...m,final:finalScore,memeCode,secteurBonus,sCompSect};
   }).sort((a,b)=>b.final-a.final);
@@ -1035,9 +1034,8 @@ h+='<div style="font-size:11px;color:var(--muted);margin-top:4px">📋 Ces résu
     'BTS Comptabilité Gestion':{'m':'Comptable / Contrôleur de gestion','risque':'Modéré'},
     'BTS Design Graphique / DNMADE':{'m':'Graphiste / Designer','risque':'Modéré'},
     'BTS Communication':{'m':'Journaliste','risque':'Modéré'},
-    'Licence Sciences de la Vie':{'m':'Ingénieur·e mécanique','risque':'Faible'},
+    'Licence Sciences de la Vie':{'m':'Médecin généraliste','risque':'Faible'},
     'Licence Économie-Gestion':{'m':'Commercial·e','risque':'Modéré'},
-    'Data Scientist':{'m':'Data Scientist','risque':'Faible'},
   };
 
   // Construire 3 scénarios cohérents : chercher des paires formation+métier compatibles
@@ -1227,45 +1225,45 @@ const NEURO_METIER={
     malus:[],fort:false,w:0.8
   },
   hpe:{
-    bonus:["Santé","Accompagnement","Social","RH","Art","Communication"],
+    bonus:["Santé","Accompagnement","Social","RH","Arts","Communication"],
     malus:[],fort:false,w:0.6
   },
   zebre:{
-    bonus:["Recherche","Art","Accompagnement","Ingénierie","Environnement"],
+    bonus:["Recherche","Arts","Accompagnement","Ingénierie","Environnement"],
     malus:["Commerce","Logistique"],fort:false,w:0.7
   },
   "2e":{
-    bonus:["Recherche","Ingénierie","Numérique / IT","Art","Santé"],
+    bonus:["Recherche","Ingénierie","Numérique / IT","Arts","Santé"],
     malus:[],fort:false,w:0.7
   },
   hpc:{
-    bonus:["Art","Communication","Architecture","Numérique / IT","Design"],
+    bonus:["Arts","Communication","Architecture","Numérique / IT","Design"],
     malus:[],fort:false,w:0.6
   },
   // TDAH
   tdah:{
-    bonus:["Commerce","Numérique / IT","Art","Communication","Santé","Environnement"],
+    bonus:["Commerce","Numérique / IT","Arts","Communication","Santé","Environnement"],
     malus:["Finance","Droit","Comptabilité","Logistique"],fort:false,w:0.7
   },
   // DYS
   dyslexie:{
-    bonus:["Art","Numérique / IT","Architecture","Ingénierie","Commerce"],
+    bonus:["Arts","Numérique / IT","Architecture","Ingénierie","Commerce"],
     malus:["Droit","Communication"],fort:false,w:0.5
   },
   dysortho:{
-    bonus:["Numérique / IT","Art","Ingénierie","Santé"],
+    bonus:["Numérique / IT","Arts","Ingénierie","Santé"],
     malus:["Communication","Droit"],fort:false,w:0.4
   },
   dyscalc:{
-    bonus:["Art","Communication","Social","Santé","RH"],
+    bonus:["Arts","Communication","Social","Santé","RH"],
     malus:["Finance","Ingénierie","Comptabilité"],fort:false,w:0.5
   },
   dysprax:{
-    bonus:["Numérique / IT","Recherche","Art","Communication"],
+    bonus:["Numérique / IT","Recherche","Arts","Communication"],
     malus:["Logistique","BTP","Agriculture"],fort:false,w:0.4
   },
   dysphasie:{
-    bonus:["Numérique / IT","Art","Recherche","Ingénierie"],
+    bonus:["Numérique / IT","Arts","Recherche","Ingénierie"],
     malus:["Commerce","Communication"],fort:false,w:0.4
   },
   // SPECTRE
@@ -1274,7 +1272,7 @@ const NEURO_METIER={
     malus:["Commerce","Social","RH","Communication"],fort:true,w:1.0
   },
   hyper:{
-    bonus:["Santé","Social","Art","Environnement","Accompagnement","Éducation"],
+    bonus:["Santé","Social","Arts","Environnement","Accompagnement","Éducation"],
     malus:["Commerce","Finance","Logistique"],fort:false,w:0.7
   }
 };
