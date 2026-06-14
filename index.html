@@ -173,9 +173,22 @@ header{background:var(--text);color:#fff;padding:16px 28px;display:flex;align-it
 .neuro-cb{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);padding:6px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:all .15s}
 .neuro-cb:hover{border-color:var(--orange);background:rgba(255,140,0,.06)}
 .neuro-cb input{accent-color:var(--orange);width:14px;height:14px;cursor:pointer}
+/* ═══ PERSISTENCE BANNER ═══ */
+.restore-banner{position:fixed;top:0;left:0;right:0;z-index:999;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:12px;font-weight:500;box-shadow:0 2px 16px rgba(0,0,0,.25);transform:translateY(-100%);transition:transform .35s ease}
+.restore-banner.show{transform:translateY(0)}
+.restore-banner button{padding:5px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:var(--font)}
+.restore-banner .rb-ok{background:rgba(255,255,255,.95);color:#1e3a8a}
+.restore-banner .rb-clear{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.restore-banner .rb-close{background:none;color:rgba(255,255,255,.7);font-size:16px;padding:2px 8px;margin-left:4px}
 </style>
 </head>
 <body>
+<div class="restore-banner" id="restore-banner">
+  <span>💾 Session précédente retrouvée — votre progression a été restaurée.</span>
+  <button class="rb-ok" onclick="dismissRestore()">OK, continuer</button>
+  <button class="rb-clear" onclick="clearAndRestart()">Recommencer à zéro</button>
+  <button class="rb-close" onclick="dismissRestore()">✕</button>
+</div>
 <div class="fondateur-strip">✦ Accès <span>Fondateur</span> · Gratuit · Édition limitée — Bientôt disponible en version Premium ✦</div>
 <a href="https://wa.me/33617994627?text=Bonjour%2C%20j%27ai%20utilis%C3%A9%20CONSENSIOO%20et%20je%20souhaite%20un%20entretien%20avec%20un%20consultant." target="_blank" rel="noopener noreferrer" class="wa-float" title="Contacter un consultant CONSENSIOO via WhatsApp">
   <span class="wa-ico">💬</span>
@@ -553,6 +566,7 @@ function setMode(m){
   document.getElementById('psef').style.display=m==='reconversion'?'block':'none';
   document.getElementById('pmef').style.display=m==='reconversion'?'block':'none';
   buildAll();
+  saveState();
 }
 
 function buildAll(){
@@ -591,6 +605,7 @@ function sa(cat,i,v){
       bRec.title=ok?'':'Répondez à au moins 18 affirmations RIASEC';
     }
   }
+  saveState();
 }
 
 function buildContraintes(){
@@ -625,6 +640,7 @@ function goStep(n){
   document.getElementById('page-'+n).classList.add('active');
   if(n===7) updatePrixPage();
   window.scrollTo(0,0);
+  saveState();
 }
 function updatePrixPage(){
   if(IS_GRATUIT) return;
@@ -1190,6 +1206,7 @@ h+='<div style="font-size:11px;color:var(--muted);margin-top:4px">📋 Ces résu
 }
 
 function resetAll(){
+  clearSavedState();
   mode=null;Object.keys(ans).forEach(k=>{ans[k]={};});
   document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
   document.querySelectorAll('input[type=checkbox]').forEach(c=>{if(c.closest('#neuro-grid'))c.checked=false;});
@@ -1291,6 +1308,178 @@ function scoreNeuro(secteur, neuroList){
   });
   return count>0 ? Math.max(-1,Math.min(1,total/count)) : 0;
 }
+
+// ══ PERSISTENCE — localStorage ══════════════════════════════════
+const STORAGE_KEY='consensioo_v1';
+let _saveTimer=null;
+let _isRestoring=false;
+
+function saveState(){
+  if(_isRestoring) return;
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{
+    try{
+      const state={
+        mode:mode,
+        ans:{r:{...ans.r},v:{...ans.v},m:{...ans.m},c:{...ans.c}},
+        step:getCurrentStep(),
+        profile:getProfileValues(),
+        neuro:getNeuro(),
+        constraints:getConstraintValues(),
+        ts:Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    }catch(e){console.warn('Sauvegarde:',e);}
+  },300);
+}
+
+function getCurrentStep(){
+  const pages=document.querySelectorAll('.page');
+  for(let i=0;i<pages.length;i++){if(pages[i].classList.contains('active'))return i;}
+  return 0;
+}
+
+function getProfileValues(){
+  const ids=['pp','pnom','pa','pn','ps','pl','pse','pme'];
+  const vals={};
+  ids.forEach(id=>{const v=gv(id);if(v)vals[id]=v;});
+  return vals;
+}
+
+function getConstraintValues(){
+  const ids=['cb','cd','ce','cf','caf','cr','ct','cdur','cm','co','cri'];
+  const vals={};
+  ids.forEach(id=>{const v=gv(id);if(v)vals[id]=v;});
+  return vals;
+}
+
+function restoreState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const state=JSON.parse(raw);
+    if(!state||!state.mode) return false;
+    // Trop vieux (> 30 jours) → ignorer
+    if(state.ts && Date.now()-state.ts > 30*24*3600*1000){clearSavedState();return false;}
+
+    _isRestoring=true;
+
+    // 1. Mode → déclenche buildAll() + buildContraintes()
+    setMode(state.mode);
+
+    // 2. Profil (champs statiques)
+    if(state.profile){
+      Object.entries(state.profile).forEach(([id,val])=>{
+        const el=document.getElementById(id);
+        if(el&&val) el.value=val;
+      });
+      // Afficher champs reconversion si nécessaire
+      if(state.mode==='reconversion'){
+        document.getElementById('psef').style.display='block';
+        document.getElementById('pmef').style.display='block';
+      }
+    }
+
+    // 3. Neuro
+    if(state.neuro&&state.neuro.length){
+      state.neuro.forEach(id=>{
+        const el=document.getElementById('n-'+id);
+        if(el) el.checked=true;
+      });
+    }
+
+    // 4. Réponses questionnaires + boutons radio
+    if(state.ans){
+      Object.keys(state.ans).forEach(cat=>{
+        Object.entries(state.ans[cat]).forEach(([i,v])=>{
+          ans[cat][i]=Number(v);
+          const radio=document.querySelector('input[name="'+cat+'_'+i+'"][value="'+v+'"]');
+          if(radio) radio.checked=true;
+        });
+      });
+      // Barre de progression RIASEC
+      const n=Object.keys(ans.r).length;
+      const rp=document.getElementById('rp');
+      const rpf=document.getElementById('rpf');
+      if(rp) rp.textContent=n+' / 36 répondus';
+      if(rpf) rpf.style.width=(n/36*100)+'%';
+      // Bouton recommandations
+      const bRec=document.querySelector('#page-5 .navb .btn.pri');
+      if(bRec){
+        const ok=n>=18;
+        bRec.disabled=!ok;
+        bRec.style.opacity=ok?'1':'0.45';
+      }
+    }
+
+    // 5. Contraintes (champs dynamiques, après buildContraintes)
+    if(state.constraints){
+      setTimeout(()=>{
+        Object.entries(state.constraints).forEach(([id,val])=>{
+          const el=document.getElementById(id);
+          if(el&&val) el.value=val;
+        });
+      },100);
+    }
+
+    // 6. Navigation — restaurer l'étape (sauf résultats, qu'il faut recalculer)
+    const targetStep=state.step>=6?5:state.step;
+    if(targetStep>0) goStep(targetStep);
+
+    _isRestoring=false;
+    return true;
+  }catch(e){
+    _isRestoring=false;
+    console.warn('Restauration:',e);
+    return false;
+  }
+}
+
+function clearSavedState(){
+  try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+}
+
+function dismissRestore(){
+  const b=document.getElementById('restore-banner');
+  if(b) b.classList.remove('show');
+}
+
+function clearAndRestart(){
+  dismissRestore();
+  resetAll();
+}
+
+// ══ LISTENERS AUTO-SAVE — champs formulaire ════════════════════
+function initFormListeners(){
+  // Profil
+  ['pp','pnom','pa','pn','ps','pl','pse','pme'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input',()=>saveState());
+  });
+  // Contraintes — délégation (champs dynamiques)
+  const conFields=document.getElementById('confields');
+  if(conFields){
+    conFields.addEventListener('input',()=>saveState());
+    conFields.addEventListener('change',()=>saveState());
+  }
+  // Neuro
+  const neuroGrid=document.getElementById('neuro-grid');
+  if(neuroGrid) neuroGrid.addEventListener('change',()=>saveState());
+}
+
+// ══ INIT ════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  initFormListeners();
+  const restored=restoreState();
+  if(restored){
+    const b=document.getElementById('restore-banner');
+    if(b){
+      setTimeout(()=>b.classList.add('show'),200);
+      // Auto-dismiss après 6s
+      setTimeout(()=>dismissRestore(),6000);
+    }
+  }
+});
 </script>
 
 <footer style="text-align:center;padding:13px;font-size:11px;color:#7b82a0;border-top:1px solid #dde2f0;background:#151824;margin-top:8px">Outil Holistique — Orientation &amp; Reconversion · © Thibault NJECKIL — Dépôt INPI 2026 · Finance · Budget · Résilience</footer>
